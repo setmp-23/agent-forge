@@ -1,0 +1,14 @@
+{
+  "name": "agent-forge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Desktop editor for building and previewing agent workflows",
+  "scripts": {
+    "build": "node build.js",
+    "start": "node server.js",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.8.4"
+  }
+}

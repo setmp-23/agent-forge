@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#10110f" />
+  <meta name="description" content="Build agent workflows as a graph, check the branches, and run a mock preview on your machine." />
+  <title>Agent Forge — Visual Agent Workflow Builder</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Agent Forge home"><span class="brand-mark"><svg viewBox="0 0 32 32"><path d="M16 3.5 28 10v12L16 28.5 4 22V10z"/><path d="M16 3.5v12.8m12-6.3-12 6.3L4 10m12 6.3V28.5"/></svg></span><span>agent<span class="brand-light">forge</span></span><span class="version">BETA</span></a>
+      <div class="project-name"><span class="project-dot"></span><span id="projectTitle">Research assistant</span><button id="renameProject" class="icon-btn tiny" title="Rename workflow" aria-label="Rename workflow">✎</button><span class="crumb">/</span><span class="muted">main.flow</span></div>
+      <div class="top-actions"><span class="saved-state"><span class="status-dot"></span><span id="saveStatus">Saved locally</span></span><button id="importBtn" class="btn btn-quiet"><span>↑</span> Import JSON</button><input id="importFile" type="file" accept=".json,application/json" hidden /><button id="exportBtn" class="btn btn-primary"><span>↓</span> Export flow <span class="kbd">⌘ E</span></button></div>
+    </header>
+    <div class="workspace">
+      <aside class="leftbar">
+        <div class="rail-top"><button class="rail-btn active" title="Workflow builder"><span>⌘</span></button><button class="rail-btn" id="templatesBtn" title="Templates"><span>▦</span></button><button class="rail-btn" title="Help" id="helpBtn"><span>?</span></button></div>
+        <div class="rail-bottom"><span class="local-lock" title="Runs on this machine">◈</span></div>
+      </aside>
+      <aside class="sidebar">
+        <div class="sidebar-heading"><div><span class="eyebrow">WORKSPACE</span><div class="space-title">My agents <span class="chevron">⌄</span></div></div><button class="icon-btn" title="Создать workflow" id="newFlow">＋</button></div>
+        <div class="sidebar-section"><div class="section-label">YOUR FLOWS <button id="newFlowSmall" aria-label="Create workflow">＋</button></div><div id="flowList"></div></div>
+        <div class="sidebar-section node-library"><div class="section-label">NODE LIBRARY <span class="shortcut">DRAG TO CANVAS</span></div>
+          <div class="library-group">
+            <button class="library-node" draggable="true" data-type="agent"><span class="node-icon agent-icon">✳</span><span><b>Agent</b><small>LLM reasoning step</small></span><span class="add-hint">＋</span></button>
+            <button class="library-node" draggable="true" data-type="tool"><span class="node-icon tool-icon">⌘</span><span><b>Tool call</b><small>Execute a function</small></span><span class="add-hint">＋</span></button>
+            <button class="library-node" draggable="true" data-type="condition"><span class="node-icon condition-icon">◇</span><span><b>Condition</b><small>Branch by expression</small></span><span class="add-hint">＋</span></button>
+            <button class="library-node" draggable="true" data-type="human"><span class="node-icon human-icon">♙</span><span><b>Human review</b><small>Wait for approval</small></span><span class="add-hint">＋</span></button>
+            <button class="library-node" draggable="true" data-type="parallel"><span class="node-icon parallel-icon">⑂</span><span><b>Parallel</b><small>Fan-out into branches</small></span><span class="add-hint">＋</span></button>
+            <button class="library-node" draggable="true" data-type="output"><span class="node-icon output-icon">↗</span><span><b>Output</b><small>Return a result</small></span><span class="add-hint">＋</span></button>
+          </div>
+          <div class="library-tip"><span>✦</span><div><b>Build your flow</b><p>Drag nodes onto the canvas, then connect them to define how your agent thinks.</p></div></div>
+        </div>
+        <div class="sidebar-footer"><span class="footer-lock">◈</span><span>LOCAL ONLY</span><span class="footer-sep">·</span><span>Workflows stay in this browser.</span></div>
+      </aside>
+      <main class="main-area">
+        <div class="toolbar"><div class="breadcrumb"><span>My agents</span><span>›</span><b id="toolbarFlowTitle">Research assistant</b></div><div class="toolbar-actions"><button class="tool-action" id="undoBtn" title="Undo"><span>↶</span></button><button class="tool-action" id="redoBtn" title="Redo"><span>↷</span></button><span class="v-divider"></span><button class="tool-action" id="zoomOut" title="Zoom out">−</button><span id="zoomLabel" class="zoom-label">100%</span><button class="tool-action" id="zoomIn" title="Zoom in">＋</button><button class="tool-action fit-btn" id="fitBtn">Fit</button><span class="v-divider"></span><button class="btn btn-outline" id="validateBtn"><span>✓</span> Check flow</button><button class="btn btn-run" id="runBtn"><span class="play">▶</span> Run preview</button></div></div>
+        <div class="canvas-wrap" id="canvasWrap"><div class="canvas-grid"></div><svg class="edges" id="edges" aria-label="Связи между узлами"></svg><div class="canvas" id="canvas"></div><div class="canvas-hint" id="canvasHint"><span class="hint-key">Tip</span> Click a node to inspect it <span class="hint-sep">·</span> click an output port, then a target node to connect</div><div class="minimap"><div class="minimap-label">MINIMAP</div><div class="minimap-view" id="minimapView"></div><div class="minimap-nodes" id="minimapNodes"></div></div><div class="canvas-zoom">⌖ <span id="zoomLabelSmall">100%</span></div><div class="connection-help" id="connectionHelp">Choose a target node… <button id="cancelConnect">Cancel</button></div></div>
+        <section class="console" id="console"><div class="console-top"><div class="console-tabs"><button class="console-tab active" data-tab="run">RUN LOG <span class="log-count" id="logCount">0</span></button><button class="console-tab" data-tab="issues">ISSUES <span class="issue-count" id="issueCount">0</span></button><button class="console-tab" data-tab="preview">FLOW PREVIEW</button></div><div class="console-status"><span class="status-dot muted-dot"></span><span id="runStatus">Ready to run</span><button class="collapse-btn" id="collapseConsole">⌄</button></div></div><div class="console-body" id="consoleBody"><div class="empty-log"><span class="terminal-icon">⌘</span><div><b>Nothing run yet</b><span>Start a preview to see which steps run and where the flow branches.</span></div><button class="btn btn-small" id="consoleRun">▶ &nbsp;Run preview</button></div></div></section>
+      </main>
+      <aside class="inspector" id="inspector"><div class="inspector-empty"><div class="inspector-spark">✳</div><b>Nothing selected</b><p>Select a node on the canvas to configure its behavior.</p><button class="btn btn-outline btn-small" id="addFirstNode">＋ &nbsp;Add a node</button></div><div class="inspector-content hidden" id="inspectorContent"></div></aside>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="modal-backdrop hidden" id="exportModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="exportHeading"><div class="modal-head"><div><span class="eyebrow">WORKFLOW FILE</span><h2 id="exportHeading">Export flow</h2></div><button class="icon-btn" data-close="exportModal">×</button></div><p class="modal-copy">Save this graph as YAML or JSON. The file describes the workflow; it does not install or run it in another agent tool.</p><div class="export-formats"><button class="format-card selected" data-format="yaml"><span class="format-icon">YAML</span><b>YAML</b><small>Readable, easy to edit</small><span class="format-check">✓</span></button><button class="format-card" data-format="json"><span class="format-icon json-icon">{ }</span><b>JSON</b><small>Structured, easy to parse</small><span class="format-check">✓</span></button></div><div class="export-targets"><span class="field-label">USE AS A BUILD SPEC FOR</span><div class="target-chips"><span>⌘ Claude Code</span><span>◈ Codex</span><span>◉ Copilot</span></div></div><label class="export-name-label">FILE NAME<input id="exportFilename" value="research-assistant" /></label><div class="modal-actions"><span class="privacy-note">◈ Saved on your device</span><button class="btn btn-primary" id="downloadExport">↓ &nbsp;Download .yaml</button></div></div></div>
+    <div class="modal-backdrop hidden" id="templateModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="templateHeading"><div class="modal-head"><div><span class="eyebrow">START WITH A TEMPLATE</span><h2 id="templateHeading">Flow templates</h2></div><button class="icon-btn" data-close="templateModal">×</button></div><div class="template-list"><button data-template="research"><span class="template-emoji">⌕</span><span><b>Research assistant</b><small>Search, analyze, and summarize with a human review step.</small></span><span class="template-arrow">↗</span></button><button data-template="support"><span class="template-emoji">◎</span><span><b>Support triage</b><small>Classify incoming requests and route to the right team.</small></span><span class="template-arrow">↗</span></button><button data-template="content"><span class="template-emoji">✎</span><span><b>Content pipeline</b><small>Create a brief, then fact-check and refine it with two parallel passes.</small></span><span class="template-arrow">↗</span></button><button data-template="blank"><span class="template-emoji">＋</span><span><b>Start from scratch</b><small>A blank canvas for your next idea.</small></span><span class="template-arrow">↗</span></button></div></div></div>
+    <script src="app.js"></script>
+  </div>
+</body>
+</html>
